@@ -28,11 +28,14 @@
 #ifndef __COMP__
 #define __COMP__
 
+#include "defines.h"
 /* Complex number */
 
 typedef struct {
-  float real;
-  float imag;
+  scalar real;
+  scalar imag;
 } COMP;
+
+#define C_MAG(x) s_add(s_mul(x.real, x.real),s_mul(x.imag, x.imag))
 
 #endif

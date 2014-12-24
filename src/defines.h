@@ -1,3 +1,7 @@
+/* Modified by SynKarAe December 23, 2014 for digital audio project, all 
+   changes fall under LGPL
+*/
+
 /*---------------------------------------------------------------------------*\
 
   FILE........: defines.h                                                     
@@ -48,6 +52,7 @@
 #define FFT_DEC    512	    	/* size of FFT used in decoder          */
 #define TW         40		/* Trapezoidal synthesis window overlap */
 #define V_THRESH   6.0          /* voicing threshold in dB              */
+#define LPC_MAX    20		/* maximum LPC order                    */
 #define LPC_ORD    10		/* phase modelling LPC order            */
 
 /* Pitch estimation defines */
@@ -64,11 +69,56 @@
 
 /* Structure to hold model parameters for one frame */
 
+
+#ifdef MATH_Q16_16
+#include "libfixmath/fixmath.h"
+#  define scalar fix16_t
+#else
+# ifndef scalar
+/*  default is float */
+#   define scalar float
+# endif
+#endif
+
+
+
+#ifdef MATH_Q16_16
+#  define s_add(a, b) fix16_sadd(a,b)
+#  define s_mul(a, b) fix16_smul(a,b)
+#  define s_div(q, r) fix16_sdiv(q, r)
+#  define s_sub(a, b) fix16_ssub(a, b)
+#  define fl_to_numb(a) fix16_from_float(a)
+#  define fl_from_numb(a) fix16_to_float(a)
+#  define s_log10(a) fix16_log(a)/fix16_log(10)
+#  define s_powf(x, y) fix16_exp(s_mul(y,fix16_log(x)))
+#  define numb_to_int(x) fix16_to_int(x)
+#  define s_sqrt(x)  fix16_sqrt(x)
+#  define s_abs(x)  abs(x)
+#  define s_atan2(y, x) fix16_atan2(y, x)
+#  define s_cos(x) fix16_cos(x)
+#  define s_sin(x) fix16_sin(x)
+# else
+#  define s_add(a, b) (a + b)
+#  define s_mul(a, b) (a * b)
+#  define s_div(q, r) (q / r)
+#  define s_sub(a, b) (a - b)
+#  define fl_to_numb(a) a
+#  define fl_from_numb(a) a
+#  define s_log10(a) log10f(a)
+#  define s_powf(x, y) powf(x, y)
+#  define numb_to_int(x) ((int)x)
+#  define s_sqrt(x)  sqrtf(x)
+#  define s_abs(x)  fabsf(x)
+#  define s_atan2(y, x) atan2f(y,x)
+#  define s_cos(x) cosf(x)
+#  define s_sin(x) sinf(x)
+# endif
+
 typedef struct {
-  float Wo;		/* fundamental frequency estimate in radians  */
+  scalar Wo;		/* fundamental frequency estimate in radians  */
   int   L;		/* number of harmonics                        */
-  float A[MAX_AMP+1];	/* amplitiude of each harmonic                */
-  float phi[MAX_AMP+1];	/* phase of each harmonic                     */
+  scalar A[MAX_AMP+1];	/* amplitiude of each harmonic                */
+  scalar phi[MAX_AMP+1];	/* phase of each harmonic                     */
   int   voiced;	        /* non-zero if this frame is voiced           */
 } MODEL;
 
@@ -78,7 +128,7 @@ struct lsp_codebook {
     int			k;        /* dimension of vector	*/
     int			log2m;    /* number of bits in m	*/
     int			m;        /* elements in codebook	*/
-    const float	*	cb;	  /* The elements		*/
+    const scalar	*	cb;	  /* The elements		*/
 };
 
 extern const struct lsp_codebook lsp_cb[];

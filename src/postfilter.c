@@ -34,7 +34,6 @@
 
 #include "defines.h"
 #include "comp.h"
-#include "dump.h"
 #include "sine.h"
 #include "postfilter.h"
 
@@ -100,43 +99,47 @@
 
 void postfilter(
   MODEL *model,
-  float *bg_est
+  scalar *bg_est
 )	
 {
   int   m, uv;
-  float e, thresh;
+  scalar e, thresh;
 
   /* determine average energy across spectrum */
 
-  e = 1E-12;
+  #ifdef MATH_Q16_16
+	e = 1; 		/*Potential area for error*/
+  #else
+  	e = 1E-12;
+  #endif
   for(m=1; m<=model->L; m++)
-      e += model->A[m]*model->A[m];
+      e = s_add(e, s_mul(model->A[m],model->A[m]));
 
-  assert(e > 0.0);
-  e = 10.0*log10f(e/model->L);
+  assert(e > fl_to_numb(0.0));
+  e = s_mul(fl_to_numb(10.0),s_log10(s_div(e, model->L)));
 
   /* If beneath threhold, update bg estimate.  The idea
      of the threshold is to prevent updating during high level
      speech. */
 
-  if ((e < BG_THRESH) && !model->voiced)
-      *bg_est =  *bg_est*(1.0 - BG_BETA) + e*BG_BETA;
+  if ((e < fl_to_numb(BG_THRESH)) && !model->voiced)
+      *bg_est =  s_add(s_mul(*bg_est,(s_sub(fl_to_numb(1.0), fl_to_numb(BG_BETA)))) , s_mul(e,fl_to_numb(BG_BETA)));
 
   /* now mess with phases during voiced frames to make any harmonics
      less then our background estimate unvoiced.
   */
 
   uv = 0;
-  thresh = powf(10.0, (*bg_est + BG_MARGIN)/20.0);
+  thresh = s_powf(fl_to_numb(10.0), s_div(s_add(*bg_est,BG_MARGIN), fl_to_numb(20.0)));
   if (model->voiced)
       for(m=1; m<=model->L; m++)
 	  if (model->A[m] < thresh) {
-	      model->phi[m] = TWO_PI*(float)codec2_rand()/CODEC2_RAND_MAX;
+	      model->phi[m] = s_mul(fl_to_numb(TWO_PI), fl_to_numb((float)codec2_rand()/CODEC2_RAND_MAX) );
 	      uv++;
 	  }
 
 #ifdef DUMP
-  dump_bg(e, *bg_est, 100.0*uv/model->L);
+  //dump_bg(e, *bg_est, 100.0*uv/model->L);
 #endif
 
 }

@@ -30,8 +30,9 @@
 
 #ifndef __LSP__
 #define __LSP__
+#include "defines.h"
 
-int lpc_to_lsp (float *a, int lpcrdr, float *freq, int nb, float delta);
-void lsp_to_lpc(float *freq, float *ak, int lpcrdr);
+int lpc_to_lsp (scalar *a, int lpcrdr, scalar *freq, int nb, scalar delta);
+void lsp_to_lpc(scalar *freq, scalar *ak, int lpcrdr);
 
 #endif

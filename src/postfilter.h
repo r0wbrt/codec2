@@ -27,7 +27,8 @@
 
 #ifndef __POSTFILTER__
 #define __POSTFILTER__
+#include "defines.h"
 
-void postfilter(MODEL *model, float *bg_est);
+void postfilter(MODEL *model, scalar *bg_est);
 
 #endif

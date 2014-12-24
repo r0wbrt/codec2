@@ -30,14 +30,14 @@
 
 #define LPC_MAX_ORDER 20
 
-void pre_emp(float Sn_pre[], float Sn[], float *mem, int Nsam);
-void de_emp(float Sn_se[], float Sn[], float *mem, int Nsam);
-void hanning_window(float Sn[],	float Wn[], int Nsam);
-void autocorrelate(float Sn[], float Rn[], int Nsam, int order);
-void levinson_durbin(float R[],	float lpcs[], int order);
-void inverse_filter(float Sn[], float a[], int Nsam, float res[], int order);
-void synthesis_filter(float res[], float a[], int Nsam,	int order, float Sn_[]);
-void find_aks(float Sn[], float a[], int Nsam, int order, float *E);
-void weight(float ak[],	float gamma, int order,	float akw[]);
+void pre_emp(scalar Sn_pre[], scalar Sn[], scalar *mem, int Nsam);
+void de_emp(scalar Sn_se[], scalar Sn[], scalar *mem, int Nsam);
+void hanning_window(scalar Sn[],	scalar Wn[], int Nsam);
+void autocorrelate(scalar Sn[], scalar Rn[], int Nsam, int order);
+void levinson_durbin(scalar R[],	scalar lpcs[], int order);
+void inverse_filter(scalar Sn[], scalar a[], int Nsam, scalar res[], int order);
+void synthesis_filter(scalar res[], scalar a[], int Nsam,	int order, scalar Sn_[]);
+void find_aks(scalar Sn[], scalar a[], int Nsam, int order, scalar *E);
+void weight(scalar ak[],	scalar gamma, int order,	scalar akw[]);
 
 #endif

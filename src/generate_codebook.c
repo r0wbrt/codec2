@@ -27,6 +27,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#ifdef MATH_Q16_16
+# include "fixmath.h"
+#endif
+
+
 
 static const char usage[] =
 "Usage: %s filename array_name [filename ...]\n"
@@ -58,9 +63,14 @@ dump_array(const struct codebook * b, int index)
   int	limit = b->k * b->m;
   int	i;
 
-  printf("static const float codes%d[] = {\n", index);
+
+  printf("static const scalar codes%d[] = {\n", index);
   for ( i = 0; i < limit; i++ ) {
+   #ifdef MATH_Q16_16
+    printf("  %i", fix16_from_float(b->cb[i]));
+   #else
     printf("  %g", b->cb[i]);
+   #endif
     if ( i < limit - 1 )
       printf(",");
 
@@ -76,7 +86,13 @@ dump_structure(const struct codebook * b, int index)
 {
   printf("  {\n");
   printf("    %d,\n", b->k);
-  printf("    %g,\n", log(b->m) / log(2));
+
+   #ifdef MATH_Q16_16
+    printf("  %i,\n", fix16_from_float((log(b->m) / log(2))));
+   #else
+    printf("  %g,\n", log(b->m) / log(2));
+   #endif
+
   printf("    %d,\n", b->m);
   printf("    codes%d\n", index);
   printf("  }");
