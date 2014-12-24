@@ -27,6 +27,8 @@
 #define __QUANTISE__
 
 #include "kiss_fft.h"
+#include "comp.h"
+#include "defines.h"
 
 #define WO_BITS     7
 #define WO_LEVELS   (1<<WO_BITS)
@@ -57,10 +59,12 @@ scalar lpc_model_amplitudes(scalar Sn[], scalar w[], MODEL *model, int order,
 			   int lsp,scalar ak[]);
 void aks_to_M2(kiss_fft_cfg fft_fwd_cfg, scalar ak[], int order, MODEL *model, 
 	       scalar E, scalar *snr, int dump, int sim_pf, 
-               int pf, int bass_boost, scalar beta, scalar gamma);
+               int pf, int bass_boost, scalar beta, scalar gamma, COMP Aw[]);
 
-int   encode_Wo(scalar Wo);
-scalar decode_Wo(int index);
+int   encode_Wo(scalar Wo, int bits);
+scalar decode_Wo(int index, int bits);
+int   encode_log_Wo(scalar Wo, int bits);
+scalar decode_log_Wo(int index, int bits);
 int   encode_Wo_dt(scalar Wo, scalar prev_Wo);
 scalar decode_Wo_dt(int index, scalar prev_Wo);
 void  encode_lsps_scalar(int indexes[], scalar lsp[], int order);
@@ -78,8 +82,8 @@ void decode_lsps_diff_time(scalar lsp_[],
 			   scalar lsp__prev[],
 			   int order);
 
-void encode_lsps_vq(int *indexes, scalar *x, scalar *xq, int ndim);
-void decode_lsps_vq(int *indexes, scalar *xq, int ndim);
+void encode_lsps_vq(int *indexes, scalar *x, scalar *xq, int order);
+void decode_lsps_vq(int *indexes, scalar *xq, int order, int stages);
 
 long quantise(const scalar * cb, scalar vec[], scalar w[], int k, int m, scalar *se);
 void lspvq_quantise(scalar lsp[], scalar lsp_[], int order); 
@@ -92,8 +96,8 @@ void quantise_WoE(MODEL *model, scalar *e, scalar xq[]);
 int  encode_WoE(MODEL *model, scalar e, scalar xq[]);
 void decode_WoE(MODEL *model, scalar *e, scalar xq[], int n1);
 
-int encode_energy(scalar e);
-scalar decode_energy(int index);
+int encode_energy(scalar e, int bits);
+scalar decode_energy(int index, int bits);
 
 void pack(unsigned char * bits, unsigned int *nbit, int index, unsigned int index_bits);
 void pack_natural_or_gray(unsigned char * bits, unsigned int *nbit, int index, unsigned int index_bits, unsigned int gray);

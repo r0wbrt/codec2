@@ -28,13 +28,13 @@
 #ifndef __PHASE__
 #define __PHASE__
 
-#include "defines.h"
 #include "kiss_fft.h"
+#include "comp.h"
+#include "defines.h"
 
 void phase_synth_zero_order(kiss_fft_cfg fft_dec_cfg, 
 			    MODEL *model, 
-			    scalar aks[], 
-                            scalar *ex_phase, 
-			    int order);
+                            scalar *ex_phase,
+                            COMP   A[]);
 
 #endif

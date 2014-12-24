@@ -37,8 +37,7 @@ scalar hpf(scalar x, scalar states[]);
 void dft_speech(kiss_fft_cfg fft_fwd_cfg, COMP Sw[], scalar Sn[], scalar w[]);
 void two_stage_pitch_refinement(MODEL *model, COMP Sw[]);
 void estimate_amplitudes(MODEL *model, COMP Sw[], COMP W[], int est_phase);
-scalar est_voicing_mbe(MODEL *model, COMP Sw[], COMP W[], COMP Sw_[],COMP Ew[], 
-		      scalar prev_Wo);
+scalar est_voicing_mbe(MODEL *model, COMP Sw[], COMP W[], COMP Sw_[],COMP Ew[]);
 void make_synthesis_window(scalar Pn[]);
 void synthesise(kiss_fft_cfg fft_inv_cfg, scalar Sn_[], MODEL *model, scalar Pn[], int shift);
 
