@@ -1,0 +1,6 @@
+TODO
+	* Port Comments into JavaDoc style for better documentation
+	* Produce an stable fix-point version of codec2
+	* Continue removing extra code.
+	* Optional build system that allows the adding or removing of codec2 
+	  parts to reduce the library size on embeded systems.

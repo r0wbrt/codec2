@@ -116,8 +116,8 @@ static void kf_bfly3(
          tw1 += fstride;
          tw2 += fstride*2;
 
-         Fout[m].r = Fout->r - HALF_OF(scratch[3].r);
-         Fout[m].i = Fout->i - HALF_OF(scratch[3].i);
+         Fout[m].r = Fout->r - (scratch[3].r*.5);
+         Fout[m].i = Fout->i - (scratch[3].i*.5);
 
          C_MULBYSCALAR( scratch[0] , epi3.i );
 

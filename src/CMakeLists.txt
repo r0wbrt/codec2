@@ -235,14 +235,14 @@ target_link_libraries(c2sim ${CMAKE_REQUIRED_LIBRARIES} codec2)
 #add_executable(fdmdv_interleave fdmdv_interleave.c)
 #target_link_libraries(fdmdv_interleave ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(insert_errors insert_errors.c)
-target_link_libraries(insert_errors ${CMAKE_REQUIRED_LIBRARIES})
+#add_executable(insert_errors insert_errors.c)
+#target_link_libraries(insert_errors ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(fec_enc fec_enc.c golay23.c)
-target_link_libraries(fec_enc ${CMAKE_REQUIRED_LIBRARIES} codec2)
+#add_executable(fec_enc fec_enc.c golay23.c)
+#target_link_libraries(fec_enc ${CMAKE_REQUIRED_LIBRARIES} codec2)
 
-add_executable(fec_dec fec_dec.c golay23.c)
-target_link_libraries(fec_dec ${CMAKE_REQUIRED_LIBRARIES} codec2)
+#add_executable(fec_dec fec_dec.c golay23.c)
+#target_link_libraries(fec_dec ${CMAKE_REQUIRED_LIBRARIES} codec2)
 
 #add_executable(freedv_tx freedv_tx.c)
 #target_link_libraries(freedv_tx ${CMAKE_REQUIRED_LIBRARIES} codec2)
@@ -271,8 +271,8 @@ install(TARGETS
 #    fdmdv_mod fdmdv_demod
 #    fdmdv_put_test_bits
 #    fdmdv_interleave
-    insert_errors
-    fec_enc
-    fec_dec
+#    insert_errors
+#    fec_enc
+#    fec_dec
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

@@ -24,9 +24,11 @@
   You should have received a copy of the GNU Lesser General Public License
   along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
+#include "defines.h"
 
 #ifndef __LPC__
 #define __LPC__
+
 
 #define LPC_MAX_ORDER 20
 
