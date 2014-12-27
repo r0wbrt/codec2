@@ -1,3 +1,17 @@
+/*
+Copyright (c) 2014, Robert C. Taylor (Synkarae)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+*/
 #ifndef KISS_FFT_H
 #define KISS_FFT_H
 
@@ -5,6 +19,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include "defines.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,17 +38,17 @@ extern "C" {
   in the tools/ directory.
 */
 
-#ifdef USE_SIMD
-# include <xmmintrin.h>
-# define kiss_fft_scalar __m128
-#define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
-#define KISS_FFT_FREE _mm_free
-#else	
+//#ifdef USE_SIMD
+//# include <xmmintrin.h>
+//# define kiss_fft_scalar __m128
+//#define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
+//#define KISS_FFT_FREE _mm_free
+//#else	
 #define KISS_FFT_MALLOC malloc
 #define KISS_FFT_FREE free
-#endif	
+//#endif	
 
-
+/*
 #ifdef FIXED_POINT
 #include <sys/types.h>	
 # if (FIXED_POINT == 32)
@@ -43,10 +58,16 @@ extern "C" {
 # endif
 #else
 # ifndef kiss_fft_scalar
-/*  default is float */
+/*  default is float *//*
 #   define kiss_fft_scalar float
 # endif
 #endif
+*/
+
+
+#define kiss_fft_scalar scalar
+
+
 
 typedef struct {
     kiss_fft_scalar r;

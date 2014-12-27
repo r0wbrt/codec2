@@ -1,0 +1,5 @@
+* December 27th,
+	- Removed Free-Dv from project. FreeDv should be a seperate project 
+	   from codec2. Thus, the source was modified to reflect this belief. 
+	- Removed Asterisk and stm32 source code from codec2 source code inline
+	  with the goal strip the codec2 sources down to an simple library.  

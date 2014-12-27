@@ -48,14 +48,14 @@ target_link_libraries(tquant codec2)
 add_executable(scalarlsptest scalarlsptest.c ../src/quantise.c ../src/lpc.c ../src/lsp.c ../src/dump.c ../src/kiss_fft.c ${CODEBOOKS})
 target_link_libraries(scalarlsptest codec2)
 
-add_executable(tfdmdv tfdmdv.c ../src/fdmdv.c ../src/kiss_fft.c ../src/octave.c)
-target_link_libraries(tfdmdv codec2)
+#add_executable(tfdmdv tfdmdv.c ../src/fdmdv.c ../src/kiss_fft.c ../src/octave.c)
+#target_link_libraries(tfdmdv codec2)
 
-add_executable(t16_8 t16_8.c ../src/fdmdv.c ../src/kiss_fft.c)
-target_link_libraries(t16_8 codec2)
+#add_executable(t16_8 t16_8.c ../src/fdmdv.c ../src/kiss_fft.c)
+#target_link_libraries(t16_8 codec2)
 
-add_executable(t16_8_short t16_8_short.c ../src/fdmdv.c ../src/kiss_fft.c)
-target_link_libraries(t16_8_short codec2)
+#add_executable(t16_8_short t16_8_short.c ../src/fdmdv.c ../src/kiss_fft.c)
+#target_link_libraries(t16_8_short codec2)
 
 #add_executable(t48_8 t48_8.c ../src/fdmdv.c ../src/kiss_fft.c)
 #target_link_libraries(t48_8 codec2)
@@ -87,7 +87,7 @@ set_target_properties(speexnoisesup
     PROPERTIES INCLUDE_DIRECTORIES ${SPEEXDSP_INCLUDE_DIR}
 )
 
-add_executable(fdmdv_mem fdmdv_mem.c)
+#add_executable(fdmdv_mem fdmdv_mem.c)
 
 add_executable(raw2h raw2h.c)
 target_link_libraries(raw2h codec2)
