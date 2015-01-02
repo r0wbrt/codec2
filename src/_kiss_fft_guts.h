@@ -94,20 +94,20 @@ struct kiss_fft_state{
 
 #define  C_ADD( res, a,b)\
     do { \
-	    (res).r=(a).r+(b).r;  (res).i=(a).i+(b).i; \
+	    (res).r=s_add((a).r,(b).r);  (res).i=s_add((a).i,(b).i); \
     }while(0)
 #define  C_SUB( res, a,b)\
     do { \
-	    (res).r=(a).r-(b).r;  (res).i=(a).i-(b).i; \
+	    (res).r=s_sub((a).r,(b).r);  (res).i=s_sub((a).i,(b).i); \
     }while(0)
 #define C_ADDTO( res , a)\
     do { \
-	    (res).r += (a).r;  (res).i += (a).i;\
+	    (res).r = s_add((res).r,(a).r);  (res).i = s_add((res).i,(a).i);\
     }while(0)
 
 #define C_SUBFROM( res , a)\
     do {\
-	    (res).r -= (a).r;  (res).i -= (a).i; \
+	    (res).r = s_sub((res).r,(a).r);  (res).i = s_sub((res).i,(a).i); \
     }while(0)
 
 
@@ -126,8 +126,8 @@ struct kiss_fft_state{
 
 
 /* a debugging function */
-#define pcpx(c)\
-    fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )
+#define pcpx(c)//\
+//    fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )
 
 
 #ifdef KISS_FFT_USE_ALLOCA
