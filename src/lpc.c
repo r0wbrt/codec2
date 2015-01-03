@@ -49,16 +49,17 @@
 \*---------------------------------------------------------------------------*/
 
 void pre_emp(
-  float  Sn_pre[], /* output frame of speech samples                     */
-  float  Sn[],	   /* input frame of speech samples                      */
-  float *mem,      /* Sn[-1]single sample memory                         */
+  scalar  Sn_pre[], /* output frame of speech samples                     */
+  scalar  Sn[],	   /* input frame of speech samples                      */
+  scalar *mem,      /* Sn[-1]single sample memory                         */
   int   Nsam	   /* number of speech samples to use                    */
 )
 {
     int   i;
 
+	scalar ALPHA_ = fl_to_numb(ALPHA);
     for(i=0; i<Nsam; i++) {
-	Sn_pre[i] = Sn[i] - ALPHA * mem[0];
+	Sn_pre[i] = s_sub(Sn[i] , s_mul(ALPHA_ , mem[0]));
 	mem[0] = Sn[i];
     }
 
@@ -74,16 +75,16 @@ void pre_emp(
 \*---------------------------------------------------------------------------*/
 
 void de_emp(
-  float  Sn_de[],  /* output frame of speech samples                     */
-  float  Sn[],	   /* input frame of speech samples                      */
-  float *mem,      /* Sn[-1]single sample memory                         */
+  scalar  Sn_de[],  /* output frame of speech samples                     */
+  scalar  Sn[],	   /* input frame of speech samples                      */
+  scalar *mem,      /* Sn[-1]single sample memory                         */
   int    Nsam	   /* number of speech samples to use                    */
 )
 {
     int   i;
-
+    scalar BETA_ = fl_to_numb(BETA);
     for(i=0; i<Nsam; i++) {
-	Sn_de[i] = Sn[i] + BETA * mem[0];
+	Sn_de[i] = s_add(Sn[i] , s_mul(BETA_, mem[0]));
 	mem[0] = Sn_de[i];
     }
 
@@ -99,15 +100,18 @@ void de_emp(
 \*---------------------------------------------------------------------------*/
 
 void hanning_window(
-  float Sn[],	/* input frame of speech samples */
-  float Wn[],	/* output frame of windowed samples */
+  scalar Sn[],	/* input frame of speech samples */
+  scalar Wn[],	/* output frame of windowed samples */
   int Nsam	/* number of samples */
 )
 {
   int i;	/* loop variable */
+  scalar HALF = fl_to_numb(0.5);
+  scalar PI_ = fl_to_numb(2*PI);
+  scalar Nsam_ = int_to_numb(Nsam-1);
 
   for(i=0; i<Nsam; i++)
-    Wn[i] = Sn[i]*(0.5 - 0.5*cosf(2*PI*(float)i/(Nsam-1)));
+    Wn[i] = s_mul(Sn[i], ( s_sub(HALF, s_mul(HALF,s_cos(s_mul( PI_, s_div(int_to_numb(i),Nsam_))) ) )  ) );
 }
 
 /*---------------------------------------------------------------------------*\
@@ -120,18 +124,19 @@ void hanning_window(
 \*---------------------------------------------------------------------------*/
 
 void autocorrelate(
-  float Sn[],	/* frame of Nsam windowed speech samples */
-  float Rn[],	/* array of P+1 autocorrelation coefficients */
+  scalar Sn[],	/* frame of Nsam windowed speech samples */
+  scalar Rn[],	/* array of P+1 autocorrelation coefficients */
   int Nsam,	/* number of windowed samples to use */
   int order	/* order of LPC analysis */
 )
 {
   int i,j;	/* loop variables */
 
+  scalar Zero = fl_to_numb(0.0);
   for(j=0; j<order+1; j++) {
-    Rn[j] = 0.0;
+    Rn[j] = Zero;
     for(i=0; i<Nsam-j; i++)
-      Rn[j] += Sn[i]*Sn[i+j];
+      Rn[j] = s_add(Rn[j] , s_mul(Sn[i],Sn[i+j]));
   }
 }
 
@@ -151,21 +156,23 @@ void autocorrelate(
 \*---------------------------------------------------------------------------*/
 
 void levinson_durbin(
-  float R[],		/* order+1 autocorrelation coeff */
-  float lpcs[],		/* order+1 LPC's */
+  scalar R[],		/* order+1 autocorrelation coeff */
+  scalar lpcs[],		/* order+1 LPC's */
   int order		/* order of the LPC analysis */
 )
 {
-  float a[order+1][order+1];
-  float sum, e, k;
+  scalar a[order+1][order+1];
+  scalar sum, e, k;
   int i,j;				/* loop variables */
+
+  scalar ZERO = fl_to_numb(0.0);
 
   e = R[0];				/* Equation 38a, Makhoul */
 
   for(i=1; i<=order; i++) {
-    sum = 0.0;
+    sum = ZERO;
     for(j=1; j<=i-1; j++)
-      sum += a[i-1][j]*R[i-j];
+      sum = s_add(sum, s_mul(a[i-1][j],R[i-j])); //PAUSE-------------------------------->
     k = -1.0*(R[i] + sum)/e;		/* Equation 38b, Makhoul */
     if (fabsf(k) > 1.0)
       k = 0.0;

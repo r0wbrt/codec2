@@ -46,6 +46,7 @@
 #include "codec2_internal.h"
 #include "machdep.h"
 
+
 /*---------------------------------------------------------------------------*\
                                                        
                              FUNCTION HEADERS
@@ -55,20 +56,42 @@
 void analyse_one_frame(struct CODEC2 *c2, MODEL *model, short speech[]);
 void synthesise_one_frame(struct CODEC2 *c2, short speech[], MODEL *model,
 			  COMP Aw[]);
-void codec2_encode_3200(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_3200(struct CODEC2 *c2, short speech[], const unsigned char * bits);
-void codec2_encode_2400(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_2400(struct CODEC2 *c2, short speech[], const unsigned char * bits);
-void codec2_encode_1600(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_1600(struct CODEC2 *c2, short speech[], const unsigned char * bits);
-void codec2_encode_1400(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_1400(struct CODEC2 *c2, short speech[], const unsigned char * bits);
-void codec2_encode_1300(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_1300(struct CODEC2 *c2, short speech[], const unsigned char * bits, float ber_est);
-void codec2_encode_1200(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_1200(struct CODEC2 *c2, short speech[], const unsigned char * bits);
-void codec2_encode_450(struct CODEC2 *c2, unsigned char * bits, short speech[]);
-void codec2_decode_450(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+
+#ifndef NO_CODEC2_MODE_3200
+	void codec2_encode_3200(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_3200(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
+#ifndef NO_CODEC2_MODE_2400
+	void codec2_encode_2400(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_2400(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
+#ifndef NO_CODEC2_MODE_1600
+	void codec2_encode_1600(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_1600(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
+#ifndef NO_CODEC2_MODE_1400
+	void codec2_encode_1400(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_1400(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
+#ifndef NO_CODEC2_MODE_1300
+	void codec2_encode_1300(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_1300(struct CODEC2 *c2, short speech[], const unsigned char * bits, float ber_est);
+#endif
+
+#ifndef NO_CODEC2_MODE_1200
+	void codec2_encode_1200(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_1200(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
+#ifndef NO_CODEC2_MODE_450
+	void codec2_encode_450(struct CODEC2 *c2, unsigned char * bits, short speech[]);
+	void codec2_decode_450(struct CODEC2 *c2, short speech[], const unsigned char * bits);
+#endif
+
 static void ear_protection(float in_out[], int n);
 
 /*---------------------------------------------------------------------------*\
@@ -101,39 +124,77 @@ struct CODEC2 * CODEC2_WIN32SUPPORT codec2_create(int mode)
 	return NULL;
     
     assert(
-	   (mode == CODEC2_MODE_3200) || 
-	   (mode == CODEC2_MODE_2400) || 
-	   (mode == CODEC2_MODE_1600) || 
-	   (mode == CODEC2_MODE_1400) || 
-	   (mode == CODEC2_MODE_1300) || 
-	   (mode == CODEC2_MODE_1200) ||
-	   (mode == CODEC2_MODE_450) 
+	#ifndef NO_CODEC2_MODE_3200
+	   (mode == CODEC2_MODE_3200)  
+	#else
+		(1==1)	
+	#endif
+			||
+	#ifndef NO_CODEC2_MODE_2400
+	   (mode == CODEC2_MODE_2400)  
+	#else
+		(1==1)	
+	#endif
+			||
+
+	#ifndef NO_CODEC2_MODE_1600 
+	   (mode == CODEC2_MODE_1600)  
+	#else
+		(1==1)	
+	#endif
+			||
+
+	#ifndef NO_CODEC2_MODE_1400 
+	   (mode == CODEC2_MODE_1400)  
+	#else
+		(1==1)	
+	#endif
+			||
+
+	#ifndef NO_CODEC2_MODE_1300 
+	   (mode == CODEC2_MODE_1300)  
+	#else
+		(1==1)	
+	#endif
+			||
+
+	#ifndef NO_CODEC2_MODE_1200 
+	   (mode == CODEC2_MODE_1200)   
+	#else
+		(1==1)	
+	#endif
+			||
+	#ifndef NO_CODEC2_MODE_450
+	   (mode == CODEC2_MODE_450)
+	#else
+		(1==1)
+	#endif 
 	   );
     c2->mode = mode;
     for(i=0; i<M; i++)
-	c2->Sn[i] = 1.0;
-    c2->hpf_states[0] = c2->hpf_states[1] = 0.0;
+	c2->Sn[i] = fl_to_numb(1.0);
+    c2->hpf_states[0] = c2->hpf_states[1] = fl_to_numb(0.0);
     for(i=0; i<2*N; i++)
-	c2->Sn_[i] = 0;
+	c2->Sn_[i] = fl_to_numb(0);
     c2->fft_fwd_cfg = kiss_fft_alloc(FFT_ENC, 0, NULL, NULL);
     make_analysis_window(c2->fft_fwd_cfg, c2->w,c2->W);
     make_synthesis_window(c2->Pn);
     c2->fft_inv_cfg = kiss_fft_alloc(FFT_DEC, 1, NULL, NULL);
     quantise_init();
-    c2->prev_Wo_enc = 0.0;
-    c2->bg_est = 0.0;
-    c2->ex_phase = 0.0;
+    c2->prev_Wo_enc = fl_to_numb(0.0);
+    c2->bg_est = fl_to_numb(0.0);
+    c2->ex_phase = fl_to_numb(0.0);
 
     for(l=1; l<=MAX_AMP; l++)
-	c2->prev_model_dec.A[l] = 0.0;
-    c2->prev_model_dec.Wo = TWO_PI/P_MAX;
-    c2->prev_model_dec.L = PI/c2->prev_model_dec.Wo;
-    c2->prev_model_dec.voiced = 0;
+	c2->prev_model_dec.A[l] = fl_to_numb(0.0);
+    c2->prev_model_dec.Wo = s_div(fl_to_numb(TWO_PI),fl_to_numb(P_MAX));
+    c2->prev_model_dec.L = s_div(fl_to_numb(PI),c2->prev_model_dec.Wo);
+    c2->prev_model_dec.voiced = int_to_numb(0);
 
     for(i=0; i<LPC_ORD; i++) {
-      c2->prev_lsps_dec[i] = i*PI/(LPC_ORD+1);
+      c2->prev_lsps_dec[i] = s_div(s_mul(int_to_numb(i),fl_to_numb(PI)),(s_add(int_to_numb(LPC_ORD),int_to_numb(1))));
     }
-    c2->prev_e_dec = 1;
+    c2->prev_e_dec = int_to_numb(1);
 
     c2->nlp = nlp_create(M);
     if (c2->nlp == NULL) {
@@ -143,10 +204,10 @@ struct CODEC2 * CODEC2_WIN32SUPPORT codec2_create(int mode)
 
     c2->gray = 1;
 
-    c2->lpc_pf = 1; c2->bass_boost = 1; c2->beta = LPCPF_BETA; c2->gamma = LPCPF_GAMMA;
+    c2->lpc_pf = int_to_numb(1); c2->bass_boost = int_to_numb(1); c2->beta = fl_to_numb(LPCPF_BETA); c2->gamma = fl_to_numb(LPCPF_GAMMA);
 
-    c2->xq_enc[0] = c2->xq_enc[1] = 0.0;
-    c2->xq_dec[0] = c2->xq_dec[1] = 0.0;
+    c2->xq_enc[0] = c2->xq_enc[1] = fl_to_numb(0.0);
+    c2->xq_dec[0] = c2->xq_dec[1] = fl_to_numb(0.0);
 
     c2->smoothing = 0;
 

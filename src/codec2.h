@@ -62,13 +62,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define CODEC2_WIN32SUPPORT
 #endif
 
-#define CODEC2_MODE_3200 0
-#define CODEC2_MODE_2400 1
-#define CODEC2_MODE_1600 2
-#define CODEC2_MODE_1400 3
-#define CODEC2_MODE_1300 4
-#define CODEC2_MODE_1200 5
-#define CODEC2_MODE_450  6
+
+#ifndef NO_CODEC2_MODE_3200
+	#define CODEC2_MODE_3200 0
+#endif
+
+#ifndef NO_CODEC2_MODE_2400
+	#define CODEC2_MODE_2400 1
+#endif 
+
+#ifndef NO_CODEC2_MODE_1600
+	#define CODEC2_MODE_1600 2
+#endif
+
+#ifndef NO_CODEC2_MODE_1400
+	#define CODEC2_MODE_1400 3
+#endif
+
+#ifndef NO_CODEC2_MODE_1300
+	#define CODEC2_MODE_1300 4
+#endif
+
+#ifndef NO_CODEC2_MODE_1200
+	#define CODEC2_MODE_1200 5
+#endif
+
+#ifndef NO_CODEC2_MODE_450
+	#define CODEC2_MODE_450  6
+#endif
 
 struct CODEC2;
 

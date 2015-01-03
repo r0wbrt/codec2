@@ -2,6 +2,8 @@
 # Generated sources
 #
 
+#include_directories( ../../../libfixmath/trunk/libfixmath)
+
 set(D ${CMAKE_CURRENT_SOURCE_DIR}/codebook)
 
 # lsp quantisers
@@ -158,6 +160,16 @@ add_custom_command(
 # codec2 library sources
 #
 
+set(LIBFIXMATH_SRC
+	libfixmath/fix16.c
+	libfixmath/fix16_exp.c
+	libfixmath/fix16_sqrt.c
+	libfixmath/fix16_str.c
+	libfixmath/fix16_trig.c
+	libfixmath/fract32.c
+	libfixmath/uint32.c
+)
+
 set(CODEC2_SRCS
     dump.c
     lpc.c
@@ -197,6 +209,10 @@ set(CODEC2_PUBLIC_HEADERS
 #
 # Setup the codec2 library
 #
+
+add_library(libfixmath ${LIBFIXMATH_SRC})
+
+
 add_library(codec2 ${CODEC2_SRCS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(codec2 ${CMAKE_REQUIRED_LIBRARIES})
@@ -214,8 +230,8 @@ target_link_libraries(c2enc ${CMAKE_REQUIRED_LIBRARIES} codec2)
 add_executable(c2dec c2dec.c)
 target_link_libraries(c2dec ${CMAKE_REQUIRED_LIBRARIES} codec2)
 
-add_executable(c2sim c2sim.c ampexp.c phaseexp.c)
-target_link_libraries(c2sim ${CMAKE_REQUIRED_LIBRARIES} codec2)
+#add_executable(c2sim c2sim.c ampexp.c phaseexp.c)
+#target_link_libraries(c2sim ${CMAKE_REQUIRED_LIBRARIES} codec2)
 
 #add_executable(fdmdv_get_test_bits fdmdv_get_test_bits.c fdmdv.c kiss_fft.c)
 #target_link_libraries(fdmdv_get_test_bits ${CMAKE_REQUIRED_LIBRARIES})
@@ -266,7 +282,7 @@ install(TARGETS
     c2demo
     c2enc
     c2dec
-    c2sim
+#    c2sim
 #    fdmdv_get_test_bits
 #    fdmdv_mod fdmdv_demod
 #    fdmdv_put_test_bits

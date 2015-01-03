@@ -127,6 +127,16 @@ configure_file ("${PROJECT_SOURCE_DIR}/cmake/config.h.in"
                 "${PROJECT_BINARY_DIR}/config.h" )
 include_directories(${PROJECT_BINARY_DIR})
 
+#    message(STATUS "Looking for Fix Math Library.")
+#    find_path(LIBFIXMATH_INCLUDE_DIR fixmath.h)
+#    find_library(LIBFIXMATH_LIBRARY libfixmath)
+#    message(STATUS "  Fix Math headers: ${SPEEXDSP_INCLUDE_DIR}")
+#    message(STATUS "  Fix Math library: ${SPEEXDSP_LIBRARY}")
+#    if(NOT LIBFIXMATH_INCLUDE_DIR AND NOT LIBFIXMATH_LIBRARY)
+#        message(FATAL_ERROR "Libfixmath library not found!")
+#    endif()
+
+
 # CMake Package setup
 #include(CMakePackageConfigHelpers)
 #configure_package_config_file(cmake/codec2-config.cmake.in

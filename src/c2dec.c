@@ -27,6 +27,7 @@
 
 #include "codec2.h"
 #include "dump.h"
+#include "defines.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
     int            nsam, nbit, nbyte, i, byte, frames, bits_proc, bit_errors, error_mode;
     int            nstart_bit, nend_bit, bit_rate;
     int            state, next_state;
-    float          ber, r, burst_length, burst_period, burst_timer, ber_est;
+    scalar          ber, r, burst_length, burst_period, burst_timer, ber_est;
     unsigned char  mask;
     int            natural, dump;
 
@@ -111,9 +112,9 @@ int main(int argc, char *argv[])
     }
 
     error_mode = NONE;
-    ber = 0.0;
-    burst_length = burst_period = 0.0;
-    burst_timer = 0.0;
+    ber = fl_to_numb(0.0);
+    burst_length = burst_period = fl_to_numb(0.0);
+    burst_timer = fl_to_numb(0.0);
     dump = natural = 0;
 
     codec2 = codec2_create(mode);
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
         
 	if ((error_mode == UNIFORM) || (error_mode == UNIFORM_RANGE)) {
 	    for(i=nstart_bit; i<nend_bit+1; i++) {
-		r = (float)rand()/RAND_MAX;
+		r = s_div((scalar)rand(),fl_to_numb(RAND_MAX));
 		if (r < ber) {
 		    byte = i/8;
 		    //printf("nbyte %d nbit %d i %d byte %d bits[%d] 0x%0x ", nbyte, nbit, i, byte, byte, bits[byte]);
@@ -193,8 +194,13 @@ int main(int argc, char *argv[])
 	}
 
 	if (error_mode == TWO_STATE) {
-            burst_timer += (float)nbit/bit_rate;
-            fprintf(stderr, "burst_timer: %f  state: %d\n", burst_timer, state);
+            burst_timer = s_add(burst_timer, s_div((scalar)nbit,bit_rate));
+
+		#ifdef MATH_Q16_16            
+		fprintf(stderr, "burst_timer: %d  state: %d\n", burst_timer, state);
+		#else
+		fprintf(stderr, "burst_timer: %f  state: %d\n", burst_timer, state);
+		#endif
 
             next_state = state;
             switch(state) {
@@ -202,7 +208,7 @@ int main(int argc, char *argv[])
 
                 /* clear channel state - no bit errors */
 
-                if (burst_timer > (burst_period - burst_length))
+                if (burst_timer > s_sub(burst_period, burst_length))
                     next_state = 1;
                 break;
 
@@ -211,8 +217,8 @@ int main(int argc, char *argv[])
                 /* burst error state - 50% bit error rate */
 
                 for(i=nstart_bit; i<nend_bit+1; i++) {
-                    r = (float)rand()/RAND_MAX;
-                    if (r < 0.5) {
+                    r = s_div((scalar)rand(),fl_to_numb(RAND_MAX));
+                    if (r < fl_to_numb(0.5)) {
                         byte = i/8;
                         bits[byte] ^= 1 << (7 - i + byte*8);
                         bit_errors++;
@@ -221,7 +227,7 @@ int main(int argc, char *argv[])
 		}
 
                 if (burst_timer > burst_period) {
-                    burst_timer = 0.0;
+                    burst_timer = fl_to_numb(0.0);
                     next_state = 0;
                 }
                 break;
@@ -232,14 +238,14 @@ int main(int argc, char *argv[])
         }
 
         if (fber != NULL) {
-            if (fread(&ber_est, sizeof(float), 1, fber) != 1) {
+            if (fread(&ber_est, sizeof(scalar), 1, fber) != 1) {
                 fprintf(stderr, "ran out of BER estimates!\n");
                 exit(1);
             }
             //fprintf(stderr, "ber_est: %f\n", ber_est);
         }
         else
-            ber_est = 0.0;
+            ber_est = fl_to_numb(0.0);
             
 	codec2_decode_ber(codec2, buf, bits, ber_est);
  	fwrite(buf, sizeof(short), nsam, fout);
@@ -251,8 +257,13 @@ int main(int argc, char *argv[])
         memcpy(prev_bits, bits, nbyte);
     }
 
-    if (error_mode)
-	fprintf(stderr, "actual BER: %1.3f\n", (float)bit_errors/bits_proc);
+    if (error_mode) {
+	#ifdef MATH_Q16_16 
+		fprintf(stderr, "actual BER: %d\n", s_div( (scalar)bit_errors, bits_proc ));
+	#else
+		fprintf(stderr, "actual BER: %1.3f\n", s_div( (scalar)bit_errors, bits_proc ));
+	#endif
+	}
 
     codec2_destroy(codec2);
 
