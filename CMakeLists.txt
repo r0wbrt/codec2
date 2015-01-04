@@ -16,6 +16,8 @@ mark_as_advanced(CLEAR
     CMAKE_INSTALL_LIBDIR
 )
 
+#add_definitions( -DMATH_Q16_16 )
+
 #
 # Prevent in-source builds
 # If an in-source build is attempted, you will still need to clean up a few
@@ -92,7 +94,7 @@ endif(MINGW)
 #
 option(BUILD_SHARED_LIBS
     "Build shared library. Set to OFF for static library." ON)
-option(UNITTEST "Build unittest binaries." ON)
+option(UNITTEST "Build unittest binaries." OFF)
 option(INSTALL_EXAMPLES "Install example code." OFF)
 if(INSTALL_EXAMPLES)
     install(DIRECTORY octave raw script voicing wav

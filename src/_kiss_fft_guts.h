@@ -62,11 +62,10 @@ struct kiss_fft_state{
  * */
 
 
-/*
 
 
 
-//Start code
+
 
 
 #define C_FIXDIV(c, div) /*NOOP*/
@@ -126,8 +125,8 @@ struct kiss_fft_state{
 
 
 /* a debugging function */
-#define pcpx(c)//\
-//    fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )
+#define pcpx(c)/*
+    fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )*/
 
 
 #ifdef KISS_FFT_USE_ALLOCA

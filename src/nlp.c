@@ -25,6 +25,21 @@
   along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+Copyright (c) 2014, Robert C. Taylor (Synkarae)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+*/
+
 #include "defines.h"
 #include "nlp.h"
 #include "dump.h"
@@ -63,7 +78,7 @@
 
 /* 48 tap 600Hz low pass FIR filter coefficients */
 
-const float nlp_fir[] = {
+const scalar nlp_fir[] = {
   -1.0818124e-03,
   -1.1008344e-03,
   -9.2768838e-04,
@@ -116,18 +131,18 @@ const float nlp_fir[] = {
 
 typedef struct {
     int           m;
-    float         w[PMAX_M/DEC];     /* DFT window                   */ 
-    float         sq[PMAX_M];	     /* squared speech samples       */
-    float         mem_x,mem_y;       /* memory for notch filter      */
-    float         mem_fir[NLP_NTAP]; /* decimation FIR filter memory */
+    scalar         w[PMAX_M/DEC];     /* DFT window                   */ 
+    scalar         sq[PMAX_M];	     /* squared speech samples       */
+    scalar         mem_x,mem_y;       /* memory for notch filter      */
+    scalar         mem_fir[NLP_NTAP]; /* decimation FIR filter memory */
     kiss_fft_cfg  fft_cfg;           /* kiss FFT config              */
 } NLP;
 
-float test_candidate_mbe(COMP Sw[], COMP W[], float f0);
-float post_process_mbe(COMP Fw[], int pmin, int pmax, float gmax, COMP Sw[], COMP W[], float *prev_Wo);
-float post_process_sub_multiples(COMP Fw[], 
-				 int pmin, int pmax, float gmax, int gmax_bin,
-				 float *prev_Wo);
+scalar test_candidate_mbe(COMP Sw[], COMP W[], scalar f0);
+scalar post_process_mbe(COMP Fw[], int pmin, int pmax, scalar gmax, COMP Sw[], COMP W[], scalar *prev_Wo);
+scalar post_process_sub_multiples(COMP Fw[], 
+				 int pmin, int pmax, scalar gmax, int gmax_bin,
+				 scalar *prev_Wo);
 
 /*---------------------------------------------------------------------------*\
                                                                              
@@ -151,16 +166,24 @@ int    m			/* analysis window size */
 	return NULL;
 
     nlp->m = m;
+    scalar PI2_ = fl_to_numb(2*PI);
+    scalar DEC_ = int_to_numb(m/DEC - 1); 
+    scalar HALF = fl_to_numb(.5);
+    scalar ZERO = fl_to_numb(0.0);
+    scalar a, b, c;
     for(i=0; i<m/DEC; i++) {
-	nlp->w[i] = 0.5 - 0.5*cosf(2*PI*i/(m/DEC-1));
+	a = s_div(s_mul(PI2_, int_to_numb(i) ) ,  DEC_);
+	b = s_mul(HALF,s_cos(a));
+	nlp->w[i] = s_sub(HALF, b);
+	//nlp->w[i] = 0.5 - 0.5*cosf(2*PI*i/(m/DEC-1));
     }
 
     for(i=0; i<PMAX_M; i++)
-	nlp->sq[i] = 0.0;
-    nlp->mem_x = 0.0;
-    nlp->mem_y = 0.0;
+	nlp->sq[i] = ZERO;
+    nlp->mem_x = ZERO;
+    nlp->mem_y = ZERO;
     for(i=0; i<NLP_NTAP; i++)
-	nlp->mem_fir[i] = 0.0;
+	nlp->mem_fir[i] = ZERO;
 
     nlp->fft_cfg = kiss_fft_alloc (PE_FFT_SIZE, 0, NULL, NULL);
     assert(nlp->fft_cfg != NULL);
@@ -274,7 +297,7 @@ float nlp(
 
 	nlp->sq[i] = 0.0;
 	for(j=0; j<NLP_NTAP; j++)
-	    nlp->sq[i] += nlp->mem_fir[j]*nlp_fir[j];
+	    nlp->sq[i] += nlp->mem_fir[j]*fl_to_numb(nlp_fir[j]);
     }
 
     PROFILE_SAMPLE_AND_LOG(filter, tnotch, "      filter");

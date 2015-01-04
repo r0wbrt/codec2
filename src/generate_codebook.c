@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include <math.h>
 #ifdef MATH_Q16_16
-# include "fixmath.h"
+# include "libfixmath/fixmath.h"
 #endif
 
 

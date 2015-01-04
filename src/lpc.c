@@ -25,6 +25,21 @@
   along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+Copyright (c) 2014, Robert C. Taylor (Synkarae)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+*/
+
 #define LPC_MAX_N 512		/* maximum no. of samples in frame */
 #define PI 3.141592654		/* mathematical constant */
 
@@ -107,11 +122,15 @@ void hanning_window(
 {
   int i;	/* loop variable */
   scalar HALF = fl_to_numb(0.5);
-  scalar PI_ = fl_to_numb(2*PI);
+  scalar PI2_ = fl_to_numb(2*PI);
   scalar Nsam_ = int_to_numb(Nsam-1);
 
-  for(i=0; i<Nsam; i++)
-    Wn[i] = s_mul(Sn[i], ( s_sub(HALF, s_mul(HALF,s_cos(s_mul( PI_, s_div(int_to_numb(i),Nsam_))) ) )  ) );
+  for(i=0; i<Nsam; i++){
+
+	scalar sc_cos = s_mul(HALF,s_cos(s_mul( PI2_, s_div(fl_to_numb((float)i),Nsam_))));
+	scalar sc_a  = s_sub(HALF, sc_cos);
+    Wn[i] = s_mul(Sn[i], sc_a);
+	}
 }
 
 /*---------------------------------------------------------------------------*\
@@ -172,22 +191,22 @@ void levinson_durbin(
   for(i=1; i<=order; i++) {
     sum = ZERO;
     for(j=1; j<=i-1; j++)
-      sum = s_add(sum, s_mul(a[i-1][j],R[i-j])); //PAUSE-------------------------------->
-    k = -1.0*(R[i] + sum)/e;		/* Equation 38b, Makhoul */
-    if (fabsf(k) > 1.0)
-      k = 0.0;
+      sum = s_add(sum, s_mul(a[i-1][j],R[i-j])); 
+    k = s_mul(-1.0, s_div(s_add(R[i], sum),e));		/* Equation 38b, Makhoul */
+    if (s_abs(k) > fl_to_numb(1.0))
+      k = ZERO;
 
     a[i][i] = k;
 
     for(j=1; j<=i-1; j++)
-      a[i][j] = a[i-1][j] + k*a[i-1][i-j];	/* Equation 38c, Makhoul */
+      a[i][j] = s_add(a[i-1][j] , s_mul(k,a[i-1][i-j]));	/* Equation 38c, Makhoul */
 
-    e *= (1-k*k);				/* Equation 38d, Makhoul */
+    e = s_mul(e, s_sub(fl_to_numb(1.0),s_mul(k,k)));				/* Equation 38d, Makhoul */
   }
 
   for(i=1; i<=order; i++)
     lpcs[i] = a[order][i];
-  lpcs[0] = 1.0;  
+  lpcs[0] = fl_to_numb(1.0);  
 }
 
 /*---------------------------------------------------------------------------*\
@@ -202,19 +221,19 @@ void levinson_durbin(
 \*---------------------------------------------------------------------------*/
 
 void inverse_filter(
-  float Sn[],	/* Nsam input samples */
-  float a[],	/* LPCs for this frame of samples */
+  scalar Sn[],	/* Nsam input samples */
+  scalar a[],	/* LPCs for this frame of samples */
   int Nsam,	/* number of samples */
-  float res[],	/* Nsam residual samples */
+  scalar res[],	/* Nsam residual samples */
   int order	/* order of LPC */
 )
 {
   int i,j;	/* loop variables */
 
   for(i=0; i<Nsam; i++) {
-    res[i] = 0.0;
+    res[i] = fl_to_numb(0.0);
     for(j=0; j<=order; j++)
-      res[i] += Sn[i-j]*a[j];
+      res[i] = s_add(res[i] , s_mul(Sn[i-j],a[j]));
   }    
 }
 
@@ -238,11 +257,11 @@ void inverse_filter(
 \*---------------------------------------------------------------------------*/
 
 void synthesis_filter(
-  float res[],	/* Nsam input residual (excitation) samples */
-  float a[],	/* LPCs for this frame of speech samples */
+  scalar res[],	/* Nsam input residual (excitation) samples */
+  scalar a[],	/* LPCs for this frame of speech samples */
   int Nsam,	/* number of speech samples */
   int order,	/* LPC order */
-  float Sn_[]	/* Nsam output synthesised speech samples */
+  scalar Sn_[]	/* Nsam output synthesised speech samples */
 )
 {
   int i,j;	/* loop variables */
@@ -250,9 +269,9 @@ void synthesis_filter(
   /* Filter Nsam samples */
 
   for(i=0; i<Nsam; i++) {
-    Sn_[i] = res[i]*a[0];
+    Sn_[i] = s_mul(res[i],a[0]);
     for(j=1; j<=order; j++)
-      Sn_[i] -= Sn_[i-j]*a[j];
+      Sn_[i] = s_sub(Sn_[i],  s_mul(Sn_[i-j],a[j]));
   }
 }
 
@@ -266,15 +285,15 @@ void synthesis_filter(
 \*---------------------------------------------------------------------------*/
 
 void find_aks(
-  float Sn[],	/* Nsam samples with order sample memory */
-  float a[],	/* order+1 LPCs with first coeff 1.0 */
+  scalar Sn[],	/* Nsam samples with order sample memory */
+  scalar a[],	/* order+1 LPCs with first coeff 1.0 */
   int Nsam,	/* number of input speech samples */
   int order,	/* order of the LPC analysis */
-  float *E	/* residual energy */
+  scalar *E	/* residual energy */
 )
 {
-  float Wn[LPC_MAX_N];	/* windowed frame of Nsam speech samples */
-  float R[order+1];	/* order+1 autocorrelation values of Sn[] */
+  scalar Wn[LPC_MAX_N];	/* windowed frame of Nsam speech samples */
+  scalar R[order+1];	/* order+1 autocorrelation values of Sn[] */
   int i;
 
   assert(Nsam < LPC_MAX_N);
@@ -283,11 +302,16 @@ void find_aks(
   autocorrelate(Wn,R,Nsam,order);
   levinson_durbin(R,a,order);
 
-  *E = 0.0;
+  *E = fl_to_numb(0.0);
   for(i=0; i<=order; i++)
-    *E += a[i]*R[i];
-  if (*E < 0.0)
-    *E = 1E-12;
+    *E = s_add(*E , s_mul(a[i],R[i]));
+  if (*E < fl_to_numb(0.0)) {
+	#ifdef MATH_Q16_16   
+	 *E = 1;
+	#else
+	 *E = powf(2, -16);//fl_to_numb(1E-12); For debuging purposes. 
+	#endif
+  }
 }
 
 /*---------------------------------------------------------------------------*\
@@ -299,15 +323,15 @@ void find_aks(
 \*---------------------------------------------------------------------------*/
 
 void weight(
-  float ak[],	/* vector of order+1 LPCs */
-  float gamma,	/* weighting factor */
+  scalar ak[],	/* vector of order+1 LPCs */
+  scalar gamma,	/* weighting factor */
   int order,	/* num LPCs (excluding leading 1.0) */
-  float akw[]	/* weighted vector of order+1 LPCs */
+  scalar akw[]	/* weighted vector of order+1 LPCs */
 )
 {
   int i;
   
   for(i=1; i<=order; i++)
-    akw[i] = ak[i]*powf(gamma,(float)i);
+    akw[i] = s_mul(ak[i],s_powf(gamma,fl_to_numb((float)i)));
 }
     

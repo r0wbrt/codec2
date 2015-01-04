@@ -160,15 +160,15 @@ add_custom_command(
 # codec2 library sources
 #
 
-set(LIBFIXMATH_SRC
-	libfixmath/fix16.c
-	libfixmath/fix16_exp.c
-	libfixmath/fix16_sqrt.c
-	libfixmath/fix16_str.c
-	libfixmath/fix16_trig.c
-	libfixmath/fract32.c
-	libfixmath/uint32.c
-)
+#set(LIBFIXMATH_SRC
+#	libfixmath/fix16.c
+#	libfixmath/fix16_exp.c
+#	libfixmath/fix16_sqrt.c
+#	libfixmath/fix16_str.c
+#	libfixmath/fix16_trig.c
+#	libfixmath/fract32.c
+#	libfixmath/uint32.c
+#)
 
 set(CODEC2_SRCS
     dump.c
@@ -177,7 +177,7 @@ set(CODEC2_SRCS
     postfilter.c
     sine.c
     codec2.c
-    fifo.c
+   fifo.c
 #    fdmdv.c
     kiss_fft.c
     interp.c
@@ -193,9 +193,16 @@ set(CODEC2_SRCS
     codebookvqanssi.c
     codebookdt.c
     codebookge.c
-    golay23.c
+#    golay23.c
 #    freedv_api.c
-    varicode.c
+#    varicode.c
+	libfixmath/fix16.c
+	libfixmath/fix16_exp.c
+	libfixmath/fix16_sqrt.c
+	libfixmath/fix16_str.c
+	libfixmath/fix16_trig.c
+	libfixmath/fract32.c
+	libfixmath/uint32.c
 )
 
 set(CODEC2_PUBLIC_HEADERS
@@ -204,15 +211,25 @@ set(CODEC2_PUBLIC_HEADERS
 #    codec2_fdmdv.h
     codec2_fifo.h
     comp.h
+	fixmath.h
 )
+
+#set(LIBFIXMATH_PUBLIC_HEADERS
+#	fixmath.h
+#)
+
+
+#add_library(fixmath ${LIBFIXMATH_SRC})
+#set_target_properties(fixmath PROPERTIES
+#    PUBLIC_HEADER "${LIBFIXMATH_PUBLIC_HEADERS}"
+#)
+
+
+
 
 #
 # Setup the codec2 library
 #
-
-add_library(libfixmath ${LIBFIXMATH_SRC})
-
-
 add_library(codec2 ${CODEC2_SRCS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(codec2 ${CMAKE_REQUIRED_LIBRARIES})
